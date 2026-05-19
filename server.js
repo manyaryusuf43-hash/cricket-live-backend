@@ -127,6 +127,34 @@ app.get("/upcoming", async (req, res) => {
     });
   }
 });
+// Series route
+app.get("/series", (req, res) => {
+  res.json({
+    status: "success",
+    series: [
+      {
+        id: "1",
+        name: "Indian Premier League 2026"
+      },
+      {
+        id: "2",
+        name: "ICC T20 World Cup 2026"
+      },
+      {
+        id: "3",
+        name: "Asia Cup 2026"
+      },
+      {
+        id: "4",
+        name: "Big Bash League"
+      },
+      {
+        id: "5",
+        name: "Pakistan Super League"
+      }
+    ]
+  });
+});
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });

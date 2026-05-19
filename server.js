@@ -13,31 +13,37 @@ app.get("/", (req, res) => {
   res.send("Cricket Live Backend Running");
 });
 
-// Live route
+// Live match route
 app.get("/live", async (req, res) => {
   try {
-    const url = "https://www.espncricinfo.com/live-cricket-score";
-    const { data } = await axios.get(url);
+    const url = "https://www.cricbuzz.com/cricket-match/live-scores";
+    const { data } = await axios.get(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
 
     const $ = cheerio.load(data);
     const matches = [];
 
-    $(".ds-p-4").each((i, el) => {
-      const name = $(el).find("h3").first().text().trim();
-      const status = $(el).find(".ds-text-tight-m").first().text().trim();
-      const score = $(el).find(".ds-text-compact-m").first().text().trim();
+    $(".cb-mtch-lst").each((i, el) => {
+      const name = $(el).find(".cb-lv-scr-mtch-hdr").text().trim();
+      const status = $(el).find(".cb-text-live").text().trim() ||
+                     $(el).find(".cb-text-complete").text().trim();
+      const score = $(el).find(".cb-lv-scrs-col").first().text().trim();
 
       if (name) {
         matches.push({
           id: String(i + 1),
-          name: name || "Match",
+          name: name,
           status: status || "Live",
-          score: score || "Score not available"
+          score: score || "-"
         });
       }
     });
 
-    // Agar ESPN se data na mile to fallback
+    // Agar kuch nahi mila
     if (matches.length === 0) {
       matches.push({
         id: "1",
@@ -59,7 +65,7 @@ app.get("/live", async (req, res) => {
         {
           id: "1",
           name: "Live data unavailable",
-          status: "Using fallback data",
+          status: "Cricbuzz blocked request",
           score: "-"
         }
       ]

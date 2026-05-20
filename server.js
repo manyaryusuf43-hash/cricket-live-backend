@@ -12,52 +12,45 @@ const PORT = process.env.PORT || 10000;
 app.get("/", (req, res) => {
   res.send("Cricket Live Backend Running");
 });
-
 // Live match route
 app.get("/live", async (req, res) => {
   try {
     const { data } = await axios.get(
-      "https://www.cricbuzz.com/cricket-match/live-scores",
-      {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        }
-      }
+      "https://www.espncricinfo.com/live-cricket-score"
     );
 
     const $ = cheerio.load(data);
     const matches = [];
 
-    $('div.cb-mtch-lst, .cb-col-100').each((i, el) => {
-      const name =
-  $(el).find('h3').first().text().trim() ||
-  $(el).find('.cb-lv-scr-mtch-hdr').first().text().trim();
-        
-        
+    $('a[href*="/live-cricket-score"]').each((i, el) => {
+      if (i >= 10) return; // max 10 matches
 
-      const status =
-        $(el).find(".cb-text-live").first().text().trim() ||
-        $(el).find(".cb-text-complete").first().text().trim() ||
-        "Live";
+      const text = $(el).text().replace(/\s+/g, " ").trim();
 
-      const score =
-  $(el).find('.cb-lv-scrs-col').text().trim() ||
-  $(el).find('.cb-min-bat-rw').text().trim() ||
-  "-";
-      if (name) {
+      if (text.length > 20) {
         matches.push({
           id: String(i + 1),
-          name: name,
-          status: status,
-          score: score
+          name: text.substring(0, 60),
+          status: "Live",
+          score: "Tap to view"
         });
       }
     });
 
-    // Fallback if no matches found
-    if (matches.length === 0) {
-      matches.push({
+    // Duplicate remove
+    const uniqueMatches = [];
+    const seen = new Set();
+
+    matches.forEach(match => {
+      if (!seen.has(match.name)) {
+        seen.add(match.name);
+        uniqueMatches.push(match);
+      }
+    });
+
+    // Fallback
+    if (uniqueMatches.length === 0) {
+      uniqueMatches.push({
         id: "1",
         name: "No Live Match Found",
         status: "Please check later",
@@ -67,8 +60,9 @@ app.get("/live", async (req, res) => {
 
     res.json({
       status: "success",
-      matches: matches
+      matches: uniqueMatches
     });
+
   } catch (error) {
     res.json({
       status: "success",
@@ -76,14 +70,13 @@ app.get("/live", async (req, res) => {
         {
           id: "1",
           name: "Live data unavailable",
-          status: "Try again later",
+          status: "Please try again later",
           score: "-"
         }
       ]
     });
   }
 });
-
 // Upcoming matches route
 app.get("/upcoming", async (req, res) => {
   try {

@@ -29,7 +29,7 @@ app.get("/live", async (req, res) => {
     const $ = cheerio.load(data);
     const matches = [];
 
-    $('.cb-col-100.cb-col').each((i, el) => {
+    $('div.cb-mtch-lst, .cb-col-100').each((i, el) => {
       const name =
   $(el).find('h3').first().text().trim() ||
   $(el).find('.cb-lv-scr-mtch-hdr').first().text().trim();

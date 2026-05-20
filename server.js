@@ -28,7 +28,14 @@ app.get("/live", async (req, res) => {
     });
 
     const page = await browser.newPage();
+await page.setUserAgent(
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+);
 
+await page.setViewport({
+  width: 1366,
+  height: 768
+});
     await page.goto("https://www.cricket.com/live-score", {
       waitUntil: "domcontentloaded",
       timeout: 60000

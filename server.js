@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   res.send("Cricket Live Backend Running");
 });
 
-// Live route
+// Live matches route
 app.get("/live", async (req, res) => {
   let browser;
 
@@ -28,34 +28,36 @@ app.get("/live", async (req, res) => {
     });
 
     const page = await browser.newPage();
-await page.setUserAgent(
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
-);
 
-await page.setViewport({
-  width: 1366,
-  height: 768
-});
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+    );
+
+    await page.setViewport({
+      width: 1366,
+      height: 768
+    });
+
     await page.goto("https://www.cricket.com/live-score", {
       waitUntil: "domcontentloaded",
       timeout: 60000
     });
 
-    // Page ko load hone ke liye thoda wait
+    // Page ko load hone ka time
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     const matches = await page.evaluate(() => {
       const items = [];
       const links = document.querySelectorAll("a");
 
-      links.forEach((link, index) => {
+      links.forEach((link) => {
         const text = (link.innerText || "")
           .replace(/\s+/g, " ")
           .trim();
 
         if (
           text.length > 20 &&
-          index < 10 &&
+          items.length < 10 &&
           !items.some(item => item.name === text.substring(0, 80))
         ) {
           items.push({
@@ -87,41 +89,45 @@ await page.setViewport({
     }
 
     res.json({
-  status: "success",
-  matches: matches
-});
-    
-} catch (error) {
-  if (browser) {
-    await browser.close();
-  }
+      status: "success",
+      matches: matches
+    });
 
-  res.json({
-    status: "success",
-    matches: [
-      {
-        id: "1",
-        name: "RCB vs CSK",
-        status: "Live",
-        score: "Tap to view"
-      },
-      {
-        id: "2",
-        name: "MI vs GT",
-        status: "Live",
-        score: "Tap to view"
-      },
-      {
-        id: "3",
-        name: "KKR vs SRH",
-        status: "Live",
-        score: "Tap to view"
-      }
-    ]
-  });
+  } catch (error) {
+    console.error(error);
+
+    if (browser) {
+      await browser.close();
     }
 
-// Dummy upcoming route
+    // Fallback data
+    res.json({
+      status: "success",
+      matches: [
+        {
+          id: "1",
+          name: "RCB vs CSK",
+          status: "Live",
+          score: "Tap to view"
+        },
+        {
+          id: "2",
+          name: "MI vs GT",
+          status: "Live",
+          score: "Tap to view"
+        },
+        {
+          id: "3",
+          name: "KKR vs SRH",
+          status: "Live",
+          score: "Tap to view"
+        }
+      ]
+    });
+  }
+});
+
+// Upcoming matches route
 app.get("/upcoming", (req, res) => {
   res.json({
     status: "success",
@@ -131,6 +137,12 @@ app.get("/upcoming", (req, res) => {
         name: "India vs Australia",
         status: "Tomorrow",
         score: "7:30 PM"
+      },
+      {
+        id: "2",
+        name: "England vs South Africa",
+        status: "Tomorrow",
+        score: "3:30 PM"
       }
     ]
   });
@@ -151,5 +163,5 @@ app.get("/series", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log(`Server running on port ${PORT}`);
 });

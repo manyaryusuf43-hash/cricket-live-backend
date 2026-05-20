@@ -29,10 +29,12 @@ app.get("/live", async (req, res) => {
     const $ = cheerio.load(data);
     const matches = [];
 
-    $(".cb-mtch-lst").each((i, el) => {
+    $('.cb-col-100.cb-col').each((i, el) => {
       const name =
-        $(el).find(".cb-lv-scr-mtch-hdr").first().text().trim() ||
-        $(el).find("h3").first().text().trim();
+  $(el).find('h3').first().text().trim() ||
+  $(el).find('.cb-lv-scr-mtch-hdr').first().text().trim();
+        
+        
 
       const status =
         $(el).find(".cb-text-live").first().text().trim() ||
@@ -40,10 +42,9 @@ app.get("/live", async (req, res) => {
         "Live";
 
       const score =
-        $(el).find(".cb-lv-scrs-col").first().text().trim() ||
-        $(el).find(".cb-min-bat-rw").first().text().trim() ||
-        "-";
-
+  $(el).find('.cb-lv-scrs-col').text().trim() ||
+  $(el).find('.cb-min-bat-rw').text().trim() ||
+  "-";
       if (name) {
         matches.push({
           id: String(i + 1),

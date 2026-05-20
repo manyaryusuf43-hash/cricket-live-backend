@@ -28,7 +28,10 @@ app.get("/live", async (req, res) => {
     });
 
     const page = await browser.newPage();
-
+return res.json({
+  status: "success",
+  message: "Puppeteer is working"
+});
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
     );

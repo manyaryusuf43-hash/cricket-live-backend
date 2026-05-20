@@ -30,7 +30,7 @@ app.get("/live", async (req, res) => {
     const page = await browser.newPage();
 
     await page.goto(
-      "https://www.espncricinfo.com/live-cricket-score",
+      "https://www.cricket.com/live-score",
       {
         waitUntil: "domcontentloaded",
         timeout: 60000

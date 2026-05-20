@@ -101,31 +101,6 @@ await page.waitForSelector("a", {
     if (browser) {
       await browser.close();
     }
-
-    // Fallback data
-    res.json({
-      status: "success",
-      matches: [
-        {
-          id: "1",
-          name: "RCB vs CSK",
-          status: "Live",
-          score: "Tap to view"
-        },
-        {
-          id: "2",
-          name: "MI vs GT",
-          status: "Live",
-          score: "Tap to view"
-        },
-        {
-          id: "3",
-          name: "KKR vs SRH",
-          status: "Live",
-          score: "Tap to view"
-        }
-      ]
-    });
   }
 });
 

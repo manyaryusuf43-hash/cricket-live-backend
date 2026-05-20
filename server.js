@@ -42,7 +42,9 @@ app.get("/live", async (req, res) => {
       waitUntil: "domcontentloaded",
       timeout: 60000
     });
-
+await page.waitForSelector("a", {
+  timeout: 15000
+});
     // Page ko load hone ka time
     await new Promise(resolve => setTimeout(resolve, 5000));
 

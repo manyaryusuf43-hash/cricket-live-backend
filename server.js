@@ -87,11 +87,11 @@ await page.setViewport({
     }
 
     res.json({
-      status: "success",
-      matches: matches
-    });
-
-catch (error) {
+  status: "success",
+  matches: matches
+});
+    
+} catch (error) {
   if (browser) {
     await browser.close();
   }

@@ -14,43 +14,58 @@ app.get("/", (req, res) => {
 });
 // Live match route
 app.get("/live", async (req, res) => {
+  let browser;
+
   try {
-    const { data } = await axios.get(
-      "https://www.espncricinfo.com/live-cricket-score"
-    );
-
-    const $ = cheerio.load(data);
-    const matches = [];
-
-    $('a[href*="/live-cricket-score"]').each((i, el) => {
-      if (i >= 10) return; // max 10 matches
-
-      const text = $(el).text().replace(/\s+/g, " ").trim();
-
-      if (text.length > 20) {
-        matches.push({
-          id: String(i + 1),
-          name: text.substring(0, 60),
-          status: "Live",
-          score: "Tap to view"
-        });
-      }
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
-    // Duplicate remove
-    const uniqueMatches = [];
+    const page = await browser.newPage();
+
+    await page.goto(
+      "https://www.espncricinfo.com/live-cricket-score",
+      {
+        waitUntil: "domcontentloaded",
+        timeout: 60000
+      }
+    );
+
+    const matches = await page.evaluate(() => {
+      const items = [];
+      const links = document.querySelectorAll(
+        'a[href*="/live-cricket-score"]'
+      );
+
+      links.forEach((link, index) => {
+        const text = link.innerText.replace(/\s+/g, " ").trim();
+
+        if (text.length > 20 && index < 10) {
+          items.push({
+            id: String(index + 1),
+            name: text.substring(0, 80),
+            status: "Live",
+            score: "Tap to view"
+          });
+        }
+      });
+
+      return items;
+    });
+
+    const unique = [];
     const seen = new Set();
 
     matches.forEach(match => {
       if (!seen.has(match.name)) {
         seen.add(match.name);
-        uniqueMatches.push(match);
+        unique.push(match);
       }
     });
 
-    // Fallback
-    if (uniqueMatches.length === 0) {
-      uniqueMatches.push({
+    if (unique.length === 0) {
+      unique.push({
         id: "1",
         name: "No Live Match Found",
         status: "Please check later",
@@ -60,7 +75,7 @@ app.get("/live", async (req, res) => {
 
     res.json({
       status: "success",
-      matches: uniqueMatches
+      matches: unique
     });
 
   } catch (error) {
@@ -75,6 +90,10 @@ app.get("/live", async (req, res) => {
         }
       ]
     });
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 });
 // Upcoming matches route

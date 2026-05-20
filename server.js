@@ -40,7 +40,7 @@ app.get("/live", async (req, res) => {
 
     await page.goto("https://www.cricket.com/live-score", {
       waitUntil: "domcontentloaded",
-      timeout: 60000
+      timeout: 15000
     });
 await page.waitForSelector("a", {
   timeout: 15000

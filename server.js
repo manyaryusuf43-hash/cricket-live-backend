@@ -12,41 +12,33 @@ app.get("/", (req, res) => {
 });
 
 app.get("/live", async (req, res) => {
+
   try {
 
-    const url = "https://www.cricbuzz.com/cricket-match/live-scores";
+    const response = await axios.get("https://www.cricbuzz.com/cricket-match/live-scores");
 
-    const response = await axios.get(url);
+    const html = response.data;
 
-    const $ = cheerio.load(response.data);
+    const matches = [];
 
-    let matches = [];
+    const regex = /[A-Z]{2,4} vs [A-Z]{2,4}/g;
 
-    $("h3").each((i, el) => {
+    const found = html.match(regex);
 
-      const name = $(el)
-  .text()
-  .trim();
-        
-        
-        
+    if (found) {
 
-      const score = $(el)
-        .find(".cb-scr-wll-chvrn")
-        .first()
-        .text()
-        .trim();
+      found.forEach((match, index) => {
 
-      if (name) {
         matches.push({
-          id: String(i + 1),
-          name: name,
+          id: String(index + 1),
+          name: match,
           status: "Live",
-          score: score || "Updating..."
+          score: "Updating..."
         });
-      }
 
-    });
+      });
+
+    }
 
     res.json({
       status: "success",
@@ -61,6 +53,7 @@ app.get("/live", async (req, res) => {
     });
 
   }
+
 });
 
 const PORT = process.env.PORT || 10000;

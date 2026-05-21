@@ -1,60 +1,87 @@
 const express = require("express");
 const axios = require("axios");
-const cheerio = require("cheerio");
 const cors = require("cors");
 
 const app = express();
 
 app.use(cors());
 
+// Saved cache
+let savedMatches = [];
+
+// Home
 app.get("/", (req, res) => {
-  res.send("Cricket Live Backend Running");
+  res.send("Unlimited Cricket Backend Running");
 });
 
-app.get("/live", async (req, res) => {
+// LIVE API
+app.get("/live", (req, res) => {
+
+  res.json({
+    status: "success",
+    matches: savedMatches
+  });
+
+});
+
+// AUTO UPDATE FUNCTION
+async function updateMatches() {
 
   try {
 
-    const response = await axios.get("https://www.cricbuzz.com/cricket-match/live-scores");
+    console.log("Updating matches...");
 
-    const html = response.data;
+    const response = await axios.get(
+      "https://site.web.api.espn.com/apis/v2/sports/cricket/scoreboard"
+    );
 
-    const matches = [];
+    const events = response.data.events || [];
 
-    const regex = /[A-Z]{2,4} vs [A-Z]{2,4}/g;
+    let newMatches = [];
 
-    const found = html.match(regex);
+    events.forEach((match, index) => {
 
-    if (found) {
+      const team1 =
+        match.competitions?.[0]?.competitors?.[0]?.team?.shortDisplayName || "Team 1";
 
-      found.forEach((match, index) => {
+      const team2 =
+        match.competitions?.[0]?.competitors?.[1]?.team?.shortDisplayName || "Team 2";
 
-        matches.push({
-          id: String(index + 1),
-          name: match,
-          status: "Live",
-          score: "Updating..."
-        });
+      const score1 =
+        match.competitions?.[0]?.competitors?.[0]?.score || "0";
 
+      const score2 =
+        match.competitions?.[0]?.competitors?.[1]?.score || "0";
+
+      const status =
+        match.status?.type?.description || "Live";
+
+      newMatches.push({
+        id: String(index + 1),
+        name: `${team1} vs ${team2}`,
+        score: `${score1} - ${score2}`,
+        status: status
       });
 
-    }
-
-    res.json({
-      status: "success",
-      matches: matches
     });
+
+    savedMatches = newMatches;
+
+    console.log("Matches updated");
 
   } catch (error) {
 
-    res.json({
-      status: "error",
-      message: error.message
-    });
+    console.log(error.message);
 
   }
 
-});
+}
+
+// FIRST TIME LOAD
+updateMatches();
+
+// AUTO REFRESH EVERY 15 SECONDS
+setInterval(updateMatches, 15000);
 
 const PORT = process.env.PORT || 10000;
 

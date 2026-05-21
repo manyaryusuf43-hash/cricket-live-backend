@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-app.get("/live", (req, res) => {
+app.get("/live", async (req, res) => {
 
   const response = await axios.get(
   "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard"

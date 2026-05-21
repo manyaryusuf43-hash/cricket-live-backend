@@ -22,15 +22,15 @@ app.get("/live", async (req, res) => {
 
     let matches = [];
 
-    $(".cb-mtch-lst").each((i, el) => {
+    $(".cb-scr-wll-chvrn").each((i, el) => {
 
       const name = $(el)
-        .find(".cb-lv-scr-mtch-hdr")
+        .find("h3")
         .text()
         .trim();
 
       const score = $(el)
-        .find(".cb-lv-scrs-col")
+        .find(".cb-scr-wll-chvrn")
         .first()
         .text()
         .trim();

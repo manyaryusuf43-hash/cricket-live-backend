@@ -6,82 +6,51 @@ const app = express();
 
 app.use(cors());
 
-// Saved cache
-let savedMatches = [];
-
-// Home
 app.get("/", (req, res) => {
-  res.send("Unlimited Cricket Backend Running");
+  res.send("Cricket Live Backend Running");
 });
 
-// LIVE API
-app.get("/live", (req, res) => {
-
-  res.json({
-    status: "success",
-    matches: savedMatches
-  });
-
-});
-
-// AUTO UPDATE FUNCTION
-async function updateMatches() {
-
+app.get("/live", async (req, res) => {
   try {
 
-    console.log("Updating matches...");
+    const url =
+      "https://site.web.api.espn.com/apis/v2/sports/cricket/scoreboard";
 
-    const response = await axios.get(
-      "https://site.web.api.espn.com/apis/v2/sports/cricket/scoreboard"
-    );
+    const response = await axios.get(url);
 
-    const events = response.data.events || [];
+    const data = response.data;
 
-    let newMatches = [];
+    let matches = [];
 
-    events.forEach((match, index) => {
+    data.events.forEach((match, i) => {
 
-      const team1 =
-        match.competitions?.[0]?.competitors?.[0]?.team?.shortDisplayName || "Team 1";
+      matches.push({
+        id: String(i + 1),
 
-      const team2 =
-        match.competitions?.[0]?.competitors?.[1]?.team?.shortDisplayName || "Team 2";
+        name: match.name || "Unknown Match",
 
-      const score1 =
-        match.competitions?.[0]?.competitors?.[0]?.score || "0";
+        status:
+          match.status?.type?.detail || "Live",
 
-      const score2 =
-        match.competitions?.[0]?.competitors?.[1]?.score || "0";
-
-      const status =
-        match.status?.type?.description || "Live";
-
-      newMatches.push({
-        id: String(index + 1),
-        name: `${team1} vs ${team2}`,
-        score: `${score1} - ${score2}`,
-        status: status
+        score: "Live Match"
       });
 
     });
 
-    savedMatches = newMatches;
-
-    console.log("Matches updated");
+    res.json({
+      status: "success",
+      matches: matches
+    });
 
   } catch (error) {
 
-    console.log(error.message);
+    res.json({
+      status: "error",
+      message: error.message
+    });
 
   }
-
-}
-
-// FIRST TIME LOAD
-updateMatches();
-
-// AUTO REFRESH EVERY 15 SECONDS
-setInterval(updateMatches, 15000);
+});
 
 const PORT = process.env.PORT || 10000;
 

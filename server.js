@@ -12,25 +12,20 @@ app.get("/", (req, res) => {
 
 app.get("/live", (req, res) => {
 
-  const matches = [
+  const response = await axios.get(
+  "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard"
+);
 
-    {
-      id: 1,
-      team1: "RCB",
-      team2: "CSK",
-      status: "Live",
-      score: "145/3 (15.2)"
-    },
-
-    {
-      id: 2,
-      team1: "India",
-      team2: "Australia",
-      status: "Upcoming",
-      score: "Starts at 7:30 PM"
-    }
-
-  ];
+const matches = response.data.events.map((match, index) => ({
+  id: index + 1,
+  team1: match.competitions[0].competitors[0].team.displayName,
+  team2: match.competitions[0].competitors[1].team.displayName,
+  status: match.status.type.detail,
+  score:
+    match.competitions[0].competitors[0].score +
+    "/" +
+    match.competitions[0].competitors[1].score
+}));
 
   res.json({
     success: true,

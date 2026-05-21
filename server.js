@@ -14,7 +14,7 @@ app.get("/live", async (req, res) => {
   try {
 
     const response = await axios.get(
-      "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard"
+      "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard?region=in&lang=en"
     );
 
     const matches = response.data.events.map((match, index) => ({

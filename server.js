@@ -1,5 +1,4 @@
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
 
 const app = express();
@@ -10,41 +9,24 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-app.get("/live", async (req, res) => {
+app.get("/live", (req, res) => {
 
-  try {
+  res.json({
+    success: true,
 
-    const response = await axios.get(
-      "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard?region=in&lang=en"
-    );
-
-    const events = response.data.events || [];
-
-    let matches = [];
-
-    events.forEach((match, index) => {
-
-      matches.push({
-        id: index + 1,
-        name: match.name,
-        status: match.status?.type?.detail || "Live"
-      });
-
-    });
-
-    res.json({
-      success: true,
-      matches: matches
-    });
-
-  } catch (err) {
-
-    res.json({
-      success: false,
-      error: err.message
-    });
-
-  }
+    matches: [
+      {
+        id: 1,
+        name: "RCB vs CSK",
+        status: "Live"
+      },
+      {
+        id: 2,
+        name: "India vs Australia",
+        status: "Upcoming"
+      }
+    ]
+  });
 
 });
 

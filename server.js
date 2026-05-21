@@ -7,12 +7,12 @@ app.use(cors());
 
 const PORT = process.env.PORT || 10000;
 
-// Home route
+// Home Route
 app.get("/", (req, res) => {
   res.send("Cricket Live Backend Running");
 });
 
-// Live matches route
+// Live Matches Route
 app.get("/live", async (req, res) => {
   let browser;
 
@@ -28,70 +28,55 @@ app.get("/live", async (req, res) => {
     });
 
     const page = await browser.newPage();
-return res.json({
-  status: "success",
-  message: "Puppeteer is working"
-});
+
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
     );
 
-    await page.setViewport({
-      width: 1366,
-      height: 768
-    });
+    await page.goto(
+      "https://www.cricbuzz.com/cricket-match/live-scores",
+      {
+        waitUntil: "domcontentloaded",
+        timeout: 60000
+      }
+    );
 
-    await page.goto("https://www.cricket.com/live-score", {
-      waitUntil: "domcontentloaded",
+    await page.waitForSelector("body", {
       timeout: 15000
     });
-await page.waitForSelector("a", {
-  timeout: 15000
-});
-    // Page ko load hone ka time
-    await new Promise(resolve => setTimeout(resolve, 5000));
 
     const matches = await page.evaluate(() => {
-      const items = [];
-      const links = document.querySelectorAll("a");
 
-      links.forEach((link) => {
-        const text = (link.innerText || "")
-          .replace(/\s+/g, " ")
-          .trim();
+      const data = [];
+
+      const elements = document.querySelectorAll("h3");
+
+      elements.forEach((el, index) => {
+
+        const text = el.innerText.trim();
 
         if (
-          text.length > 20 &&
-          items.length < 10 &&
-          !items.some(item => item.name === text.substring(0, 80))
+          text.length > 5 &&
+          text.includes("vs") &&
+          index < 10
         ) {
-          items.push({
-            id: String(items.length + 1),
-            name: text.substring(0, 80),
+
+          data.push({
+            id: String(index + 1),
+            name: text,
             status: "Live",
-            score: "Tap to view"
+            score: "Live Score Available"
           });
+
         }
+
       });
 
-      return items;
+      return data;
+
     });
 
     await browser.close();
-
-    if (matches.length === 0) {
-      return res.json({
-        status: "success",
-        matches: [
-          {
-            id: "1",
-            name: "No Live Match Found",
-            status: "Please check later",
-            score: "-"
-          }
-        ]
-      });
-    }
 
     res.json({
       status: "success",
@@ -99,15 +84,23 @@ await page.waitForSelector("a", {
     });
 
   } catch (error) {
-    console.error(error);
+
+    console.log(error);
 
     if (browser) {
       await browser.close();
     }
+
+    res.json({
+      status: "error",
+      message: error.message
+    });
+
   }
+
 });
 
-// Upcoming matches route
+// Upcoming Matches
 app.get("/upcoming", (req, res) => {
   res.json({
     status: "success",
@@ -117,27 +110,24 @@ app.get("/upcoming", (req, res) => {
         name: "India vs Australia",
         status: "Tomorrow",
         score: "7:30 PM"
-      },
-      {
-        id: "2",
-        name: "England vs South Africa",
-        status: "Tomorrow",
-        score: "3:30 PM"
       }
     ]
   });
 });
 
-// Series route
+// Series Route
 app.get("/series", (req, res) => {
   res.json({
     status: "success",
     series: [
-      { id: "1", name: "Indian Premier League 2026" },
-      { id: "2", name: "ICC T20 World Cup 2026" },
-      { id: "3", name: "Asia Cup 2026" },
-      { id: "4", name: "Big Bash League" },
-      { id: "5", name: "Pakistan Super League" }
+      {
+        id: "1",
+        name: "Indian Premier League"
+      },
+      {
+        id: "2",
+        name: "ICC Champions Trophy"
+      }
     ]
   });
 });

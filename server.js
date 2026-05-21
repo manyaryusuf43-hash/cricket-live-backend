@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("Cricket Live Backend Running");
+  res.send("Backend Running");
 });
 
 app.get("/live", async (req, res) => {
@@ -18,23 +18,15 @@ app.get("/live", async (req, res) => {
       "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard?region=in&lang=en"
     );
 
-    const events = response.data.events || [];
-
-    let matches = [];
-
-    events.forEach((match, index) => {
-
-      matches.push({
-        id: index + 1,
-        name: match.name,
-        status: match.status?.type?.detail || "Live"
-      });
-
-    });
+    const matches = response.data.events.map((match, index) => ({
+      id: index + 1,
+      name: match.name,
+      status: match.status?.type?.detail
+    }));
 
     res.json({
       success: true,
-      matches: matches
+      matches
     });
 
   } catch (err) {
@@ -51,5 +43,5 @@ app.get("/live", async (req, res) => {
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running");
 });

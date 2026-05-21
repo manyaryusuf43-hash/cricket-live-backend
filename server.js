@@ -22,12 +22,14 @@ app.get("/live", async (req, res) => {
 
     let matches = [];
 
-    $(".cb-scr-wll-chvrn").each((i, el) => {
+    $("h3").each((i, el) => {
 
       const name = $(el)
-        .find("h3")
-        .text()
-        .trim();
+  .text()
+  .trim();
+        
+        
+        
 
       const score = $(el)
         .find(".cb-scr-wll-chvrn")

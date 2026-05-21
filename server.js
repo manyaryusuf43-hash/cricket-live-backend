@@ -14,7 +14,7 @@ app.get("/live", async (req, res) => {
   try {
 
     const url =
-      "https://site.web.api.espn.com/apis/v2/sports/cricket/scoreboard";
+      "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard"
 
     const response = await axios.get(url);
 

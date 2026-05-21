@@ -15,8 +15,13 @@ app.get("/live", async (req, res) => {
   try {
 
     const response = await axios.get(
-      "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard?region=in&lang=en"
-    );
+  "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard",
+  {
+    headers: {
+      "User-Agent": "Mozilla/5.0"
+    }
+  }
+);
 
     const matches = response.data.events.map((match, index) => ({
       id: index + 1,

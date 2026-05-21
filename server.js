@@ -7,53 +7,49 @@ const app = express();
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("Cricket Live Backend Running");
+  res.send("Backend Running");
 });
 
 app.get("/live", async (req, res) => {
+
   try {
 
-    const url =
+    const response = await axios.get(
       "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard"
+    );
 
-    const response = await axios.get(url);
-
-    const data = response.data;
+    const events = response.data.events || [];
 
     let matches = [];
 
-    data.events.forEach((match, i) => {
+    events.forEach((match, index) => {
 
       matches.push({
-        id: String(i + 1),
-
-        name: match.name || "Unknown Match",
-
-        status:
-          match.status?.type?.detail || "Live",
-
-        score: "Live Match"
+        id: index + 1,
+        name: match.name,
+        status: match.status?.type?.detail || "Live"
       });
 
     });
 
     res.json({
-      status: "success",
+      success: true,
       matches: matches
     });
 
-  } catch (error) {
+  } catch (err) {
 
     res.json({
-      status: "error",
-      message: error.message
+      success: false,
+      error: err.message
     });
 
   }
+
 });
 
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running");
 });

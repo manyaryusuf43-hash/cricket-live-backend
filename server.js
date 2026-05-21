@@ -10,38 +10,32 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-app.get("/live", async (req, res) => {
+app.get("/live", (req, res) => {
 
-  try {
+  const matches = [
 
-    const response = await axios.get(
-  "https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard",
-  {
-    headers: {
-      "User-Agent": "Mozilla/5.0"
+    {
+      id: 1,
+      team1: "RCB",
+      team2: "CSK",
+      status: "Live",
+      score: "145/3 (15.2)"
+    },
+
+    {
+      id: 2,
+      team1: "India",
+      team2: "Australia",
+      status: "Upcoming",
+      score: "Starts at 7:30 PM"
     }
-  }
-);
 
-    const matches = response.data.events.map((match, index) => ({
-      id: index + 1,
-      name: match.name,
-      status: match.status?.type?.detail
-    }));
+  ];
 
-    res.json({
-      success: true,
-      matches
-    });
-
-  } catch (err) {
-
-    res.json({
-      success: false,
-      error: err.message
-    });
-
-  }
+  res.json({
+    success: true,
+    matches: matches
+  });
 
 });
 
